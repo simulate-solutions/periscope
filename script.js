@@ -96,17 +96,31 @@ dayButtons.forEach((button, index) => {
         const femaleMean = femaleMeans[index];
 
         // Update the distribution chart
-        createOverlayHistogramWithKDE(maleMean, femaleMean, 2, 1000);
+        createOverlayHistogramWithKDE(maleMean, femaleMean, 2, 100);
+
+        removeAllDots()
+        // Update the dots
+        createDotsInArea(imageElement, 35, 70, 30, 2, 40);
+        createDotsInArea(imageElement, 15, 60, 70, 10, 2);
+
+
     });
 });
 
+function removeAllDots() {
+    for (const dot of dots) {
+        dot.remove();
+    }
+    // Clear the array
+    dots.length = 0;
+}
 
-function createDots(imageElement, numDots, meanX, meanY, randomization) {
+function createDotsInArea(imageElement, numDots, areaX, areaY, areaWidth, areaHeight) {
     const container = imageElement.parentElement;
 
     for (let i = 0; i < numDots; i++) {
-        const randomX = meanX + (Math.random() - 0.5) * randomization * 2;
-        const randomY = meanY + (Math.random() - 0.5) * randomization * 2;
+        const randomX = areaX + Math.random() * areaWidth;
+        const randomY = areaY + Math.random() * areaHeight;
 
         const dot = document.createElement('div');
         dot.className = 'dot';
@@ -114,18 +128,19 @@ function createDots(imageElement, numDots, meanX, meanY, randomization) {
         dot.style.left = `${randomX}%`;
 
         container.appendChild(dot);
+
+        // Add the dot to the array
+        dots.push(dot);
     }
 }
 
-// Example usage:
+const dots = [];
 const imageElement = document.querySelector('img');
-createDots(imageElement, 50, 70, 70, 3);
-createDots(imageElement, 50, 60, 60, 3);
-
-// Example usage:
 const maleMean = 10; // Mean (average) height for males
 const femaleMean = 6; // Mean (average) height for females
 const stdDev = 2; // Standard deviation
-const numSamples = 1000; // Number of samples
+const numSamples = 100; // Number of samples
 
+createDotsInArea(imageElement, 35, 70, 30, 2, 40);
+createDotsInArea(imageElement, 15, 60, 70, 10, 2);
 createOverlayHistogramWithKDE(maleMean, femaleMean, stdDev, numSamples);
