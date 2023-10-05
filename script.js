@@ -100,6 +100,28 @@ dayButtons.forEach((button, index) => {
     });
 });
 
+
+function createDots(imageElement, numDots, meanX, meanY, randomization) {
+    const container = imageElement.parentElement;
+
+    for (let i = 0; i < numDots; i++) {
+        const randomX = meanX + (Math.random() - 0.5) * randomization * 2;
+        const randomY = meanY + (Math.random() - 0.5) * randomization * 2;
+
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.style.top = `${randomY}%`;
+        dot.style.left = `${randomX}%`;
+
+        container.appendChild(dot);
+    }
+}
+
+// Example usage:
+const imageElement = document.querySelector('img');
+createDots(imageElement, 50, 70, 70, 3);
+createDots(imageElement, 50, 60, 60, 3);
+
 // Example usage:
 const maleMean = 10; // Mean (average) height for males
 const femaleMean = 6; // Mean (average) height for females
