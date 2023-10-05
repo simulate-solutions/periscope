@@ -1,66 +1,109 @@
-// Sample height data (replace with your data)
-const maleHeights = [160, 165, 170, 175, 180, 185, 190];
-const femaleHeights = [150, 155, 160, 165, 170, 175, 180];
+function randn_bm(min, max, skew) {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random() //Converting [0,1) to (0,1)
+    while (v === 0) v = Math.random()
+    let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v)
 
-// Combine both datasets for the histogram
-const allHeights = [...maleHeights, ...femaleHeights];
+    num = num / 10.0 + 0.5 // Translate to 0 -> 1
+    if (num > 1 || num < 0)
+        num = randn_bm(min, max, skew) // resample between 0 and 1 if out of range
 
-// Define the SVG dimensions
-const margin = { top: 30, right: 30, bottom: 60, left: 60 };
-const width = 500 - margin.left - margin.right;
-const height = 300 - margin.top - margin.bottom;
+    else {
+        num = Math.pow(num, skew) // Skew
+        num *= max - min // Stretch to fill range
+        num += min // offset to min
+    }
+    return num
+}
 
-// Create an SVG element within the plot-container
-const svg = d3.select("#plot-container")
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
 
-// Create a histogram using D3.js
-const histogram = d3
-    .histogram()
-    .domain([d3.min(allHeights), d3.max(allHeights)])
-    .thresholds(10) // Number of bins
-    (allHeights);
+// Function to generate random data samples from a normal distribution
+function generateNormalDistribution(mean, stdDev, numSamples) {
+    const data = [];
+    for (let i = 0; i < numSamples; i++) {
+        const sample = randn_bm(mean - 3 * stdDev, mean + 3 * stdDev, 1);
+        data.push(sample);
+    }
+    return data;
+}
 
-// Define scales for x and y axes
-const x = d3.scaleLinear()
-    .domain([d3.min(allHeights), d3.max(allHeights)])
-    .range([0, width]);
 
-const y = d3.scaleLinear()
-    .domain([0, d3.max(histogram, d => d.length)])
-    .nice()
-    .range([height, 0]);
+// Function to create overlay histograms and KDEs for male and female heights
+function createOverlayHistogramWithKDE(maleMean, femaleMean, stdDev, numSamples) {
+    const maleHeights = generateNormalDistribution(maleMean, stdDev, numSamples);
+    const femaleHeights = generateNormalDistribution(femaleMean, stdDev, numSamples);
 
-// Create bars for the histogram
-svg.selectAll("rect")
-    .data(histogram)
-    .enter()
-    .append("rect")
-    .attr("x", d => x(d.x0) + 1)
-    .attr("width", d => Math.max(0, x(d.x1) - x(d.x0) - 1))
-    .attr("y", d => y(d.length))
-    .attr("height", d => y(0) - y(d.length))
-    .style("fill", "steelblue");
+    // Create KDE traces for male and female heights
+    const maleKDETrace = {
+        x: maleHeights,
+        type: 'histogram',
+        name: 'Bad Scenario',
+        opacity: 0.5,
+        marker: {
+            color: 'orange',
+        },
+        xaxis: 'x2', // Use the second x-axis for the KDE
+        yaxis: 'y2', // Use the second y-axis for the KDE
+        histnorm: 'probability density', // Normalize the KDE to match the histogram
+        nbinsx: 50, // Number of bins for the KDE
+    };
 
-// Add x and y axes
-svg.append("g")
-    .attr("transform", `translate(0, ${height})`)
-    .call(d3.axisBottom(x))
-    .append("text")
-    .attr("x", width / 2)
-    .attr("y", 40)
-    .attr("text-anchor", "middle")
-    .text("Height (cm)"); // X-axis label
+    const femaleKDETrace = {
+        x: femaleHeights,
+        type: 'histogram',
+        name: 'Good Scenario',
+        opacity: 0.5,
+        marker: {
+            color: 'green',
+        },
+        xaxis: 'x2', // Use the second x-axis for the KDE
+        yaxis: 'y2', // Use the second y-axis for the KDE
+        histnorm: 'probability density', // Normalize the KDE to match the histogram
+        nbinsx: 50, // Number of bins for the KDE
+    };
 
-svg.append("g")
-    .call(d3.axisLeft(y))
-    .append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("y", -40)
-    .attr("x", -height / 2)
-    .attr("text-anchor", "middle")
-    .text("Frequency"); // Y-axis label
+    const data = [maleKDETrace, femaleKDETrace];
+
+    const layout = {
+        title: 'Casualties and Kernel Density Estimation',
+        xaxis: { title: 'Casualties' },
+        yaxis: { title: 'Frequency' },
+        xaxis2: { title: 'Casualties', anchor: 'y2' }, // Second x-axis for the KDEs
+        yaxis2: { title: 'Probability Density', overlaying: 'y', side: 'right' }, // Second y-axis for the KDEs
+        barmode: 'overlay',
+    };
+
+    Plotly.newPlot('height-histogram', data, layout);
+}
+
+// Event listeners for each day button
+const dayButtons = document.querySelectorAll('.day-button');
+console.log(dayButtons);
+
+dayButtons.forEach((button, index) => {
+    button.addEventListener('click', () => {
+
+        // Log the clicked button's text (e.g., "Monday", "Tuesday", etc.)
+        console.log(`Button Clicked: ${button.textContent}`);
+
+        // Define unique male and female mean values for each day
+        const maleMeans = [10, 9, 8, 7, 6, 5, 4];
+        const femaleMeans = [6, 7, 8, 9, 10, 11, 12];
+
+        // Retrieve the mean values for the clicked day
+        const index = Array.from(dayButtons).indexOf(button);
+        const maleMean = maleMeans[index];
+        const femaleMean = femaleMeans[index];
+
+        // Update the distribution chart
+        createOverlayHistogramWithKDE(maleMean, femaleMean, 2, 1000);
+    });
+});
+
+// Example usage:
+const maleMean = 10; // Mean (average) height for males
+const femaleMean = 6; // Mean (average) height for females
+const stdDev = 2; // Standard deviation
+const numSamples = 1000; // Number of samples
+
+createOverlayHistogramWithKDE(maleMean, femaleMean, stdDev, numSamples);

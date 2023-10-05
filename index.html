@@ -15,7 +15,7 @@
         }
 
         header {
-            background-color: #007BFF;
+            background-color: #5182b8;
             color: #fff;
             padding: 20px;
             text-align: center;
@@ -33,13 +33,37 @@
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
         }
 
+        .plot-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+
+
+        section {
+            margin-bottom: 20px;
+            /* Add some spacing between sections */
+            padding: 20px;
+            /* Add padding to sections */
+            background-color: #fff;
+            /* Set background color */
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            /* Add box shadow */
+        }
+
+        h2 {
+            font-size: 24px;
+        }
+
         p {
             font-size: 18px;
             line-height: 1.6;
         }
 
         footer {
-            background-color: #007BFF;
+            background-color: #5182b8;
             color: #fff;
             text-align: center;
             padding: 10px 0;
@@ -59,24 +83,43 @@
             With a team of experienced professionals and a commitment to innovation, we help our clients leverage the
             power of technology to achieve their goals.</p>
 
-        <h2>Our Services</h2>
+        <h2>Key Principles for Security Planning</h2>
         <ul>
-            <li>IT Consultation</li>
-            <li>Software Development</li>
-            <li>Cloud Solutions</li>
-            <li>Network Security</li>
+            <li>Provide certainty to security planning</li>
+            <li>Test decision-making empirically</li>
+            <li>Explore new applications for cutting-edge technology</li>
         </ul>
 
         <h2>Contact Us</h2>
         <p>If you have any questions or would like to inquire about our services, please don't hesitate to contact us.
         </p>
-        <p>Email: info@xyztechsolutions.com</p>
-        <p>Phone: (123) 456-7890</p>
+        <p>Email: timothy.reece@simulatesolutions.com</p>
     </div>
+
+    <!-- Add a section for the histograms -->
+    <section class="plot-container">
+        <h2>Multi-Simulation Aggregation Analysis</h2>
+        <!-- Buttons for each day -->
+        <button class="day-button">Monday</button>
+        <button class="day-button">Tuesday</button>
+        <button class="day-button">Wednesday</button>
+        <button class="day-button">Thursday</button>
+        <button class="day-button">Friday</button>
+        <button class="day-button">Saturday</button>
+        <button class="day-button">Sunday</button>
+
+        <div id="height-histogram"></div>
+
+    </section>
 
     <footer>
         <p>&copy; 2023 Simulate Solutions</p>
     </footer>
+
+    <!-- Include D3.js and your JavaScript file for the plots -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>
