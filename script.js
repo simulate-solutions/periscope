@@ -87,8 +87,8 @@ dayButtons.forEach((button, index) => {
         console.log(`Button Clicked: ${button.textContent}`);
 
         // Define unique male and female mean values for each day
-        const maleMeans = [10, 9, 8, 7, 6, 5, 4];
-        const femaleMeans = [6, 7, 8, 9, 10, 11, 12];
+        const maleMeans = [10, 9, 8, 8, 6, 11, 12];
+        const femaleMeans = [6, 7, 8, 7, 10, 5, 9];
 
         // Retrieve the mean values for the clicked day
         const index = Array.from(dayButtons).indexOf(button);
