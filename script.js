@@ -1,3 +1,9 @@
+function sumLists(list1, list2) {
+    var sum1 = list1.reduce((acc, val) => acc + val, 0);
+    var sum2 = list2.reduce((acc, val) => acc + val, 0);
+    return sum1 + sum2;
+}
+
 function randn_bm(min, max, skew) {
     let u = 0, v = 0;
     while (u === 0) u = Math.random() //Converting [0,1) to (0,1)
@@ -32,6 +38,8 @@ function generateNormalDistribution(mean, stdDev, numSamples) {
 function createOverlayHistogramWithKDE(maleMean, femaleMean, stdDev, numSamples) {
     const maleHeights = generateNormalDistribution(maleMean, stdDev, numSamples);
     const femaleHeights = generateNormalDistribution(femaleMean, stdDev, numSamples);
+
+    const sumHeights = sumLists(maleHeights, femaleHeights);
 
     // Create KDE traces for male and female heights
     const maleKDETrace = {
@@ -74,6 +82,65 @@ function createOverlayHistogramWithKDE(maleMean, femaleMean, stdDev, numSamples)
     };
 
     Plotly.newPlot('height-histogram', data, layout);
+
+    return sumHeights;
+}
+
+function generateRandomHeatmapData(numPoints, minX, maxX, minY, maxY) {
+    var heatmapData = [];
+
+    for (var i = 0; i < numPoints; i++) {
+        var x = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+        var y = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+
+        heatmapData.push({ x: x, y: y, value: 1 });
+    }
+
+    return heatmapData;
+}
+
+function generateHeatmapAndDisplay(containerId, totalPoints) {
+
+    var numPoints = Math.round(totalPoints / 10);
+    var combinedHeatmapData = [];
+
+    function generateAndAppendHeatmapData(numPoints, minX, maxX, minY, maxY) {
+        var heatmapData = generateRandomHeatmapData(numPoints, minX, maxX, minY, maxY);
+        combinedHeatmapData = combinedHeatmapData.concat(heatmapData);
+    }
+
+    // Generate heatmap data for each set of coordinates
+    generateAndAppendHeatmapData(numPoints, 450, 480, 70, 550);
+    generateAndAppendHeatmapData(numPoints, 550, 580, 70, 550);
+    generateAndAppendHeatmapData(numPoints, 110, 190, 400, 450);
+    generateAndAppendHeatmapData(numPoints, 150, 600, 250, 550);
+
+    // Remove the previous heatmap container if it exists
+    var heatmapContainer = document.getElementById(containerId);
+    if (heatmapContainer) {
+        heatmapContainer.innerHTML = '';
+    }
+
+    // Create a heatmap instance
+    var heatmapInstance = h337.create({
+        container: document.getElementById(containerId),
+        radius: 15, // Adjust the radius as needed
+        maxOpacity: 0.6,
+        minOpacity: 0.1,
+        blur: 0.75,
+    });
+
+    // Clear the previous heatmap data (if any)
+    heatmapInstance.removeData();
+
+    // Convert the data format to heatmap.js format
+    var heatmapDataFormatted = {
+        max: Math.max.apply(null, combinedHeatmapData.map(function (point) { return point.value; })),
+        data: combinedHeatmapData,
+    };
+
+    // Set the data for the heatmap
+    heatmapInstance.setData(heatmapDataFormatted);
 }
 
 // Event listeners for each day button
@@ -96,51 +163,16 @@ dayButtons.forEach((button, index) => {
         const femaleMean = femaleMeans[index];
 
         // Update the distribution chart
-        createOverlayHistogramWithKDE(maleMean, femaleMean, 2, 100);
-
-        removeAllDots()
-        // Update the dots
-        createDotsInArea(imageElement, 35, 70, 30, 2, 40);
-        createDotsInArea(imageElement, 15, 60, 70, 10, 2);
-
-
+        sumHeights = createOverlayHistogramWithKDE(maleMean, femaleMean, 2, 100);
+        generateHeatmapAndDisplay('heatmapContainer', sumHeights);
     });
 });
 
-function removeAllDots() {
-    for (const dot of dots) {
-        dot.remove();
-    }
-    // Clear the array
-    dots.length = 0;
-}
-
-function createDotsInArea(imageElement, numDots, areaX, areaY, areaWidth, areaHeight) {
-    const container = imageElement.parentElement;
-
-    for (let i = 0; i < numDots; i++) {
-        const randomX = areaX + Math.random() * areaWidth;
-        const randomY = areaY + Math.random() * areaHeight;
-
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        dot.style.top = `${randomY}%`;
-        dot.style.left = `${randomX}%`;
-
-        container.appendChild(dot);
-
-        // Add the dot to the array
-        dots.push(dot);
-    }
-}
-
-const dots = [];
-const imageElement = document.querySelector('img');
+let sumHeights = 0;
 const maleMean = 10; // Mean (average) height for males
 const femaleMean = 6; // Mean (average) height for females
 const stdDev = 2; // Standard deviation
 const numSamples = 100; // Number of samples
 
-createDotsInArea(imageElement, 35, 70, 30, 2, 40);
-createDotsInArea(imageElement, 15, 60, 70, 10, 2);
-createOverlayHistogramWithKDE(maleMean, femaleMean, stdDev, numSamples);
+sumHeights = createOverlayHistogramWithKDE(maleMean, femaleMean, stdDev, numSamples);
+generateHeatmapAndDisplay('heatmapContainer', sumHeights);

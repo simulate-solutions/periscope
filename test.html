@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contour Heatmap with Background Image</title>
+    <style>
+        /* Style the container that holds both the image and heatmap */
+        #container {
+            width: 800px;
+            height: 600px;
+            position: relative;
+        }
+
+        /* Style the heatmap canvas */
+        #heatmapContainer {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Style the image */
+        #backgroundImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Ensure the image covers the entire container */
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <img id="backgroundImage" src="assets/img/Floorplan_Edit_02.png" alt="Background Image">
+        <div id="heatmapContainer"></div>
+    </div>
+    <script src="node_modules/heatmap.js/build/heatmap.js"></script>
+    <script src="my_heatmap.js"></script> <!-- Create the heatmap using JavaScript -->
+
+</body>
+
+</html>
