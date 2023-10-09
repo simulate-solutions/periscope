@@ -101,20 +101,6 @@ function generateRandomHeatmapData(numPoints, minX, maxX, minY, maxY) {
 
 function generateHeatmapAndDisplay(containerId, totalPoints) {
 
-    var numPoints = Math.round(totalPoints / 10);
-    var combinedHeatmapData = [];
-
-    function generateAndAppendHeatmapData(numPoints, minX, maxX, minY, maxY) {
-        var heatmapData = generateRandomHeatmapData(numPoints, minX, maxX, minY, maxY);
-        combinedHeatmapData = combinedHeatmapData.concat(heatmapData);
-    }
-
-    // Generate heatmap data for each set of coordinates
-    generateAndAppendHeatmapData(numPoints, 450, 480, 70, 550);
-    generateAndAppendHeatmapData(numPoints, 550, 580, 70, 550);
-    generateAndAppendHeatmapData(numPoints, 110, 190, 400, 450);
-    generateAndAppendHeatmapData(numPoints, 150, 600, 250, 550);
-
     // Remove the previous heatmap container if it exists
     var heatmapContainer = document.getElementById(containerId);
     if (heatmapContainer) {
@@ -124,10 +110,10 @@ function generateHeatmapAndDisplay(containerId, totalPoints) {
     // Create a heatmap instance
     var heatmapInstance = h337.create({
         container: document.getElementById(containerId),
-        radius: 15, // Adjust the radius as needed
-        maxOpacity: 0.6,
-        minOpacity: 0.1,
-        blur: 0.75,
+        radius: 6, // Adjust the radius as needed
+        maxOpacity: 0.99,
+        minOpacity: 0.01,
+        blur: 1,
     });
 
     // Clear the previous heatmap data (if any)
@@ -135,8 +121,8 @@ function generateHeatmapAndDisplay(containerId, totalPoints) {
 
     // Convert the data format to heatmap.js format
     var heatmapDataFormatted = {
-        max: Math.max.apply(null, combinedHeatmapData.map(function (point) { return point.value; })),
-        data: combinedHeatmapData,
+        max: Math.max.apply(null, heatmapData.map(function (point) { return point.value; })),
+        data: heatmapData,
     };
 
     // Set the data for the heatmap
@@ -153,26 +139,90 @@ dayButtons.forEach((button, index) => {
         // Log the clicked button's text (e.g., "Monday", "Tuesday", etc.)
         console.log(`Button Clicked: ${button.textContent}`);
 
-        // Define unique male and female mean values for each day
-        const maleMeans = [10, 9, 8, 8, 6, 11, 12];
-        const femaleMeans = [6, 7, 8, 7, 10, 5, 9];
+        const dayGoodMeans = [10, 9, 8, 8, 6, 11, 12];
+        const dayBadMeans = [6, 7, 8, 7, 10, 5, 9];
+
 
         // Retrieve the mean values for the clicked day
         const index = Array.from(dayButtons).indexOf(button);
-        const maleMean = maleMeans[index];
-        const femaleMean = femaleMeans[index];
+        const dayGoodMean = dayGoodMeans[index];
+        const dayBadMean = dayBadMeans[index];
 
         // Update the distribution chart
-        sumHeights = createOverlayHistogramWithKDE(maleMean, femaleMean, 2, 100);
+        createBellCurveChart(dayGoodMean, dayBadMean);
         generateHeatmapAndDisplay('heatmapContainer', sumHeights);
     });
 });
 
-let sumHeights = 0;
+
+function createBellCurveChart(scalingFactor1, scalingFactor2) {
+    // Create data for the first bell curve
+    const curve1Data = {
+        x: [],
+        y: [],
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Bad scenario',
+        line: { color: 'red' }
+    };
+
+    // Create data for the second bell curve
+    const curve2Data = {
+        x: [],
+        y: [],
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Good scenario',
+        line: { color: 'green' }
+    };
+
+    const numPoints1 = 1000; // Number of data points for each curve
+    const numPoints2 = 200; // Number of data points for each curve
+    const mu1 = 0; // Mean of the first curve
+    const sigma1 = 1; // Standard deviation of the first curve
+    const mu2 = 0; // Mean of the second curve
+    const sigma2 = 1.5; // Standard deviation of the second curve
+
+    // Generate data points for the bell curves
+    for (let i = 0; i < numPoints1; i++) {
+        const x1 = mu1 - 3 * sigma1 + (6 * sigma1 * i) / numPoints1;
+        const y1 = scalingFactor1 * (1 / (sigma1 * Math.sqrt(2 * Math.PI))) * Math.exp(-((x1 - mu1) ** 2) / (2 * sigma1 ** 2));
+        curve1Data.x.push(x1);
+        curve1Data.y.push(y1);
+    }
+
+    for (let i = 0; i < numPoints2; i++) {
+        const x2 = mu2 - 3 * sigma2 + (6 * sigma2 * i) / numPoints2;
+        const y2 = scalingFactor2 * (1 / (sigma2 * Math.sqrt(2 * Math.PI))) * Math.exp(-((x2 - mu2) ** 2) / (2 * sigma2 ** 2));
+        curve2Data.x.push(x2);
+        curve2Data.y.push(y2);
+    }
+
+    // Create the layout for the chart
+    const layout = {
+        title: 'MSA - Casualty comparison',
+        xaxis: {
+            title: '',
+            showticklabels: false // Hide x-axis tick labels
+        },
+        yaxis: { title: 'Casualty count' }
+    };
+
+    // Create the Plotly chart
+    Plotly.newPlot('bellCurveChart', [curve1Data, curve2Data], layout);
+}
+
+
+let sumHeights = 1000;
 const maleMean = 10; // Mean (average) height for males
 const femaleMean = 6; // Mean (average) height for females
 const stdDev = 2; // Standard deviation
 const numSamples = 100; // Number of samples
+const scalingFactor1 = 10;
+const scalingFactor2 = 10;
 
-sumHeights = createOverlayHistogramWithKDE(maleMean, femaleMean, stdDev, numSamples);
+// sumHeights = createOverlayHistogramWithKDE(maleMean, femaleMean, stdDev, numSamples);
 generateHeatmapAndDisplay('heatmapContainer', sumHeights);
+
+// Call the function to generate the chart
+createBellCurveChart(scalingFactor1, scalingFactor2);
