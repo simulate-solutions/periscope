@@ -99,6 +99,28 @@ function generateRandomHeatmapData(numPoints, minX, maxX, minY, maxY) {
     return heatmapData;
 }
 
+// Function to select a random sample of n elements
+function getRandomSample(array, n) {
+    const shuffled = array.slice(); // Create a shallow copy of the original array
+    let currentIndex = shuffled.length;
+    let temporaryValue, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (currentIndex !== 0) {
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        temporaryValue = shuffled[currentIndex];
+        shuffled[currentIndex] = shuffled[randomIndex];
+        shuffled[randomIndex] = temporaryValue;
+    }
+
+    // Slice the first n elements to get the random sample
+    return shuffled.slice(0, n);
+}
+
 function generateHeatmapAndDisplay(containerId, totalPoints) {
 
     // Remove the previous heatmap container if it exists
@@ -110,7 +132,7 @@ function generateHeatmapAndDisplay(containerId, totalPoints) {
     // Create a heatmap instance
     var heatmapInstance = h337.create({
         container: document.getElementById(containerId),
-        radius: 6, // Adjust the radius as needed
+        radius: 7, // Adjust the radius as needed
         maxOpacity: 0.99,
         minOpacity: 0.01,
         blur: 1,
@@ -119,10 +141,12 @@ function generateHeatmapAndDisplay(containerId, totalPoints) {
     // Clear the previous heatmap data (if any)
     heatmapInstance.removeData();
 
+    var heatmapDataSample = getRandomSample(heatmapData, totalPoints);
+
     // Convert the data format to heatmap.js format
     var heatmapDataFormatted = {
-        max: Math.max.apply(null, heatmapData.map(function (point) { return point.value; })),
-        data: heatmapData,
+        max: Math.max.apply(null, heatmapDataSample.map(function (point) { return point.value; })),
+        data: heatmapDataSample,
     };
 
     // Set the data for the heatmap
@@ -213,7 +237,7 @@ function createBellCurveChart(scalingFactor1, scalingFactor2) {
 }
 
 
-let sumHeights = 1000;
+let sumHeights = 900;
 const maleMean = 10; // Mean (average) height for males
 const femaleMean = 6; // Mean (average) height for females
 const stdDev = 2; // Standard deviation
