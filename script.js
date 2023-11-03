@@ -121,7 +121,7 @@ function getRandomSample(array, n) {
     return shuffled.slice(0, n);
 }
 
-function generateHeatmapAndDisplay(containerId, totalPoints) {
+function generateHeatmapAndDisplay(containerId, totalPoints, testData) {
 
     // Remove the previous heatmap container if it exists
     var heatmapContainer = document.getElementById(containerId);
@@ -141,7 +141,7 @@ function generateHeatmapAndDisplay(containerId, totalPoints) {
     // Clear the previous heatmap data (if any)
     heatmapInstance.removeData();
 
-    var heatmapDataSample = getRandomSample(heatmapData, totalPoints);
+    var heatmapDataSample = getRandomSample(testData, totalPoints);
 
     // Convert the data format to heatmap.js format
     var heatmapDataFormatted = {
@@ -155,7 +155,6 @@ function generateHeatmapAndDisplay(containerId, totalPoints) {
 
 // Event listeners for each day button
 const dayButtons = document.querySelectorAll('.day-button');
-console.log(dayButtons);
 
 dayButtons.forEach((button, index) => {
     button.addEventListener('click', () => {
@@ -174,10 +173,33 @@ dayButtons.forEach((button, index) => {
 
         // Update the distribution chart
         createBellCurveChart(dayGoodMean, dayBadMean);
-        generateHeatmapAndDisplay('heatmapContainer', sumHeights);
     });
 });
 
+// Event listeners for each day button
+const scenarioButtons = document.querySelectorAll('.scenario-button');
+
+scenarioButtons.forEach((button, index) => {
+    button.addEventListener('click', () => {
+
+        console.log(`Button Clicked: ${button.textContent}`);
+
+        switch (index) {
+            case 0:
+                generateHeatmapAndDisplay('heatmapContainer', sumHeights, heatmapDataBad);
+                break;
+            case 1:
+                generateHeatmapAndDisplay('heatmapContainer', sumHeights, heatmapDataGood);
+                break;
+            case 2:
+                generateHeatmapAndDisplay('heatmapContainer', sumHeights, heatmapDataAdaptArch);
+                break;
+            default:
+                // Handle the default case or any additional scenarios
+                break;
+        }
+    });
+});
 
 function createBellCurveChart(scalingFactor1, scalingFactor2) {
     // Create data for the first bell curve
@@ -241,12 +263,11 @@ let sumHeights = 900;
 const maleMean = 10; // Mean (average) height for males
 const femaleMean = 6; // Mean (average) height for females
 const stdDev = 2; // Standard deviation
-const numSamples = 100; // Number of samples
+const numSamples = 10; // Number of samples
 const scalingFactor1 = 10;
 const scalingFactor2 = 10;
 
-// sumHeights = createOverlayHistogramWithKDE(maleMean, femaleMean, stdDev, numSamples);
-generateHeatmapAndDisplay('heatmapContainer', sumHeights);
+// generateHeatmapAndDisplay('heatmapContainer', sumHeights, heatmapDataBad);
 
 // Call the function to generate the chart
 createBellCurveChart(scalingFactor1, scalingFactor2);

@@ -1,4 +1,4 @@
-var heatmapData = [
+var heatmapDataBad = [
     { x: 441, y: 450, intensity: 1.0 },
     { x: 400, y: 572, intensity: 1.0 },
     { x: 487, y: 447, intensity: 1.0 },
